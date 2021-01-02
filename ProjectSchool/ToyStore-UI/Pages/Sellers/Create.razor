@@ -1,0 +1,61 @@
+﻿@page "/sellers/create/"
+@attribute [Authorize(Roles = "Administrator")]
+
+@inject ISellerRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+<h3 class="card-title">Create New seller</h3>
+<hr />
+<br />
+@if (!isSuccess)
+{
+    <ErrorMessage Message="Something Went Wrong With the Operation" />
+}
+
+
+<EditForm Model="Model" OnValidSubmit="Createseller">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label for="firstname">First Name</label>
+        <InputText @bind-Value="Model.FirstName" class="form-control" id="firstname" />
+    </div>
+    <div class="form-group">
+        <label for="lastname">Last Name</label>
+        <InputText @bind-Value="Model.LastName" class="form-control" id="lastname" />
+    </div>
+    <div class="form-group">
+        <label for="bio">Profile</label>
+        <InputTextArea @bind-Value="Model.Profile" class="form-control" id="profile" />
+    </div>
+    <button class="btn btn-primary" type="submit">
+        <span class="oi oi-pencil"></span>
+        Create seller
+    </button>
+    <button @onclick="BackToList" class="btn btn-outline-secondary">
+        <span class="oi oi-media-skip-backward"></span>
+        Back To List
+    </button>
+</EditForm>
+
+@code{
+    private Seller Model = new Seller();
+    private bool isSuccess = true;
+
+    private async Task Createseller()
+    {
+        isSuccess = await _repo.Create(Endpoints.SellersEndpoint, Model);
+        if (isSuccess)
+        {
+            _toastService.ShowSuccess("seller Created Successfully", "");
+            BackToList();
+        }
+    }
+
+    private void BackToList()
+    {
+        _navManager.NavigateTo("/sellers/");
+    }
+}

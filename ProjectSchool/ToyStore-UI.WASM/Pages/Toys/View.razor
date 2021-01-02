@@ -1,0 +1,115 @@
+﻿@page "/toys/view/{Id}"
+@inject IToyRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+<h3>View Toy Details</h3>
+<hr />
+<br />
+@if (int.Parse(Id) < 1 || string.IsNullOrWhiteSpace(Id))
+{
+    <ErrorMessage Message="Invalid Selection. Please Try Again" />
+}
+else if (Model == null)
+{
+    <LoadingMessage Message="Loading Toy Details" />
+}
+else
+{
+    _toastService.ShowInfo($"Now Viewing {Model.Name}", "");
+
+    <div class="row">
+        <div class="col-6">
+            <table class="table table-responsive">
+                <tr>
+                    <td>
+                        <strong>Name</strong>
+                    </td>
+                    <td>@Model.Name</td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Seller</strong>
+                    </td>
+                    <td>
+                        @if (Model.Seller == null)
+                        {
+                            <span class="text-muted">No seller Recorded</span>
+                        }
+                        else
+                        {
+                            <a href="/sellers/view/@Model.SellerId">@Model.Seller.FirstName @Model.Seller.LastName</a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Summary</strong>
+                    </td>
+                    <td>@Model.Summary</td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>YearOfProduction</strong>
+                    </td>
+                    <td>@Model.YearOfProduction</td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>ModelNumber</strong>
+                    </td>
+                    <td>@Model.ModelNumber</td>
+                </tr>
+
+            </table>
+        </div>
+        <div class="col-4">
+            <img src="uploads/@Model.Image" style="height:300px; width:300px" />
+            <h3 class="text-center text-info">@string.Format("{0:C}", Model.Price)</h3>
+        </div>
+    </div>
+}
+
+<button @onclick="GoToEdit" class="btn btn-outline-warning">
+    <span class="oi oi-pencil"></span>
+    Edit Toy
+</button>
+<button @onclick="GoToDelete" class="btn btn-outline-danger">
+    <span class="oi oi-circle-x"></span>
+    Delete Toy
+</button>
+<button @onclick="BackToList" class="btn btn-outline-secondary">
+    <span class="oi oi-media-skip-backward"></span>
+    Back To List
+</button>
+
+@code {
+        [Parameter]
+ public string Id { get; set; }
+
+private Toy Model = new Toy();
+
+    protected override async Task OnInitializedAsync()
+    {
+        int id = Convert.ToInt32(Id);
+        Model = await _repo.Get(Endpoints.ToysEndpoint, id);
+
+    }
+
+    private void BackToList()
+    {
+        _navManager.NavigateTo("/Toys/");
+    }
+
+    private void GoToEdit()
+    {
+        _navManager.NavigateTo($"/Toys/edit/{Model.Id}");
+    }
+
+    private void GoToDelete()
+    {
+        _navManager.NavigateTo($"/Toys/delete/{Model.Id}");
+    }
+
+}

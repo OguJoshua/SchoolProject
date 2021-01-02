@@ -1,0 +1,70 @@
+﻿@page "/sellers/"
+
+@inject ISellerRepository _repo
+<h3 class="card-title">Index</h3>
+<hr />
+<br />
+
+@if (Model == null)
+{
+    <LoadingMessage Message="Loading sellers" />
+}
+else
+{
+    <AuthorizeView Roles="Administrator">
+        <a href="/sellers/create" class="btn btn-primary">
+            <span class="oi oi-plus"></span>
+            Create New Author
+        </a>
+        <br />
+    </AuthorizeView>
+    @if (Model.Count < 1)
+    {
+        <LoadingMessage Message="There are no sellers in the data store.
+                        Click 'Create seller' to Begin " />
+    }
+    else
+    {
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var seller in Model)
+                {
+                    <tr>
+                        <td>@seller.FirstName</td>
+                        <td>@seller.LastName</td>
+                        <td>
+                            <a href="/sellers/view/@seller.Id" class="btn btn-primary">
+                                <span class="oi oi-toy"></span>
+                            </a>
+                            <AuthorizeView Roles="Administrator">
+                                <a href="sellers/edit/@seller.Id" class="btn btn-warning">
+                                    <span class="oi oi-pencil"></span>
+                                </a>
+                                <a href="/sellers/delete/@seller.Id" class="btn btn-danger">
+                                    <span class="oi oi-delete"></span>
+                                </a>
+                            </AuthorizeView>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private IList<Seller> Model;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Model = await _repo.Get(Endpoints.SellersEndpoint);
+
+    }
+}

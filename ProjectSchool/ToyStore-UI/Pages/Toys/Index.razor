@@ -1,0 +1,93 @@
+﻿@page "/Toys/"
+@attribute [Authorize]
+
+@inject IToyRepository _repo
+@inject IToastService _toastService
+
+<h3>Index</h3>
+<hr />
+<br />
+@if (Model == null)
+{
+    <LoadingMessage Message="Loading Toys" />
+}
+else
+{
+    <AuthorizeView Roles="Administrator">
+        <a href="/Toys/create" class="btn btn-primary">
+            <span class="oi oi-plus"></span>
+            Create New Toy
+        </a>
+    </AuthorizeView>
+
+    <br />
+    <br />
+    <br />
+    @if (Model.Count < 1)
+    {
+        <LoadingMessage Message="There are no Toys in the data store.
+                        Click 'Create Toy' to Begin " />
+    }
+    else
+    {
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>ModelNumber</th>
+                    <th>Price</th>
+                    <th>seller</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var Toy in Model)
+                {
+                    <tr>
+                        <td>
+                            <img src="uploads/@Toy.Image" class="img-thumbnail" style="height:100px;width:100px" />
+                        </td>
+                        <td>@Toy.Name</td>
+                        <td>@Toy.ModelNumber</td>
+                        <td>@string.Format("{0:C}", Toy.Price)</td>
+                        <td>
+                            @if (@Toy.Seller == null)
+                            {
+                                <span class="text-muted">No seller Recorded</span>
+                            }
+                            else
+                            {
+                                <span>@Toy.Seller.FirstName @Toy.Seller.LastName </span>
+                            }
+                        </td>
+                        <td>
+                            <a href="/Toys/view/@Toy.Id" class="btn btn-primary">
+                                <span class="oi oi-Toy"></span>
+                            </a>
+                            <AuthorizeView Roles="Administrator">
+                                <a href="/Toys/edit/@Toy.Id" class="btn btn-warning">
+                                    <span class="oi oi-pencil"></span>
+                                </a>
+                                <a href="/Toys/delete/@Toy.Id" class="btn btn-danger">
+                                    <span class="oi oi-delete"></span>
+                                </a>
+                            </AuthorizeView>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+
+
+@code {
+    private IList<Toy> Model;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Model = await _repo.Get(Endpoints.ToysEndpoint);
+    }
+}
